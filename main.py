@@ -6,9 +6,14 @@ def get_weather(city_name, api_key):
     try:
         response = requests.get(complete_url)
         
-        response.raise_for_status()  
+        if response.status_code == 404:
+            print(f"No city found with the name: {city_name}")
+            return
+
+        response.raise_for_status()
 
         data = response.json()
+        
         if data['cod'] != 200:
             print(f"Error: {data['message']}")
             return
@@ -28,7 +33,10 @@ def get_weather(city_name, api_key):
         print(f"Weather Description: {description.capitalize()}")
     
     except requests.exceptions.HTTPError as http_err:
-        print(f"HTTP error occurred: {http_err}")
+        if response.status_code == 401:
+            print("Invalid API key. Please check your API key.")
+        else:
+            print(f"HTTP error occurred: {http_err}")
     except requests.exceptions.RequestException as req_err:
         print(f"Request error occurred: {req_err}")
     except Exception as e:
